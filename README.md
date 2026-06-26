@@ -16,26 +16,6 @@ A local MCP server that lets LLMs (Claude, etc.) securely search and read files 
 | `list_files(query)`      | List files in the target folder, optionally filtered by name |
 | `read_document(file_id)` | Read text content of a Google Doc or plain text file         |
 
-### Claude Desktop Configuration
-
-Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "google-drive-rag": {
-      "command": "uv",
-      "args": ["run", "python", "main.py"],
-      "cwd": "/path/to/google-drive-rag-mcp",
-      "env": {
-        "GOOGLE_APPLICATION_CREDENTIALS": "/path/to/your/service-account-key.json",
-        "TARGET_FOLDER_ID": "your_google_drive_folder_id_here"
-      }
-    }
-  }
-}
-```
-
 ## Setup
 
 ### Step 1 — Create a GCP Project and Enable APIs
@@ -95,14 +75,59 @@ TARGET_FOLDER_ID=your_google_drive_folder_id_here
 uv run python main.py
 ```
 
+### Step 5 — Connect to Claude
+
+#### Claude Desktop
+
+Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "google-drive-rag": {
+      "command": "uv",
+      "args": ["run", "python", "main.py"],
+      "cwd": "/path/to/google-drive-rag-mcp",
+      "env": {
+        "GOOGLE_APPLICATION_CREDENTIALS": "/path/to/your/service-account-key.json",
+        "TARGET_FOLDER_ID": "your_google_drive_folder_id_here"
+      }
+    }
+  }
+}
+```
+
+Restart Claude Desktop to apply the changes.
+
+#### Claude Code
+
+```bash
+claude mcp add google-drive-rag \
+  -e GOOGLE_APPLICATION_CREDENTIALS=/path/to/your/service-account-key.json \
+  -e TARGET_FOLDER_ID=your_google_drive_folder_id_here \
+  -- uv run python /path/to/google-drive-rag-mcp/main.py
+```
+
+To make it available across all projects, add `--scope user`:
+
+```bash
+claude mcp add --scope user google-drive-rag \
+  -e GOOGLE_APPLICATION_CREDENTIALS=/path/to/your/service-account-key.json \
+  -e TARGET_FOLDER_ID=your_google_drive_folder_id_here \
+  -- uv run python /path/to/google-drive-rag-mcp/main.py
+```
+
+Verify the registration:
+
+```bash
+claude mcp list
+```
+
 ## Development
 
 ```bash
 # Run the server
 uv run python main.py
-
-# Add a dependency
-uv add <package>
 ```
 
 ## License

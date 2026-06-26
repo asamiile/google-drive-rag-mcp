@@ -41,4 +41,4 @@ uv run fastmcp dev inspector main.py
 
 ### Security Check
 
-- [ ] Pass a file ID outside the target folder → `ToolError: File '...' is not in the target folder. Access denied.`
+- [x] Pass a file ID outside the target folder → `ToolError: File '...' is not in the target folder. Access denied.`

@@ -30,8 +30,8 @@
 
 ## Phase 4 — Verification
 
-- [ ] `uv sync` succeeds
-- [ ] Server exits with clear error when `.env` is missing
-- [ ] `list_files` returns files from target folder
-- [ ] `read_document` returns text from a Google Doc
-- [ ] `read_document` rejects a file outside the target folder
+- [x] `uv sync` succeeds
+- [x] Server exits with clear error when `.env` is missing
+- [x] `list_files` returns files from target folder
+- [x] `read_document` returns text from a Google Doc
+- [x] `read_document` rejects a file outside the target folder
