@@ -1,0 +1,12 @@
+[project]
+name = "google-drive-rag-mcp"
+version = "0.1.0"
+description = "Secure MCP server for RAG over a specific Google Drive folder"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "fastmcp>=3.4.2",
+    "google-api-python-client>=2.198.0",
+    "google-auth>=2.55.1",
+    "python-dotenv>=1.2.2",
+]

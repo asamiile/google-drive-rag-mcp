@@ -1,0 +1,16 @@
+# macOS
+.DS_Store
+
+# Secrets — never commit these
+.env
+*-key.json
+*-credentials.json
+*.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# uv
+.python-version
