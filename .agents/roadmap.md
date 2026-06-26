@@ -14,11 +14,11 @@
 
 ## Phase 2 — Server Implementation (`main.py`)
 
-- [ ] Startup validation (`GOOGLE_APPLICATION_CREDENTIALS`, `TARGET_FOLDER_ID`)
-- [ ] Google API client initialization (Drive v3, Docs v1)
-- [ ] Tool: `list_files(query)` — search files in target folder
-- [ ] Tool: `read_document(file_id)` — read Google Docs / plain text
-- [ ] Security check in `read_document` — verify file is in target folder
+- [x] Startup validation (`GOOGLE_APPLICATION_CREDENTIALS`, `TARGET_FOLDER_ID`)
+- [x] Google API client initialization (Drive v3, Docs v1)
+- [x] Tool: `list_files(query)` — search files in target folder
+- [x] Tool: `read_document(file_id)` — read Google Docs / plain text
+- [x] Security check in `read_document` — verify file is in target folder
 
 ## Phase 3 — Documentation (`README.md`)
 
