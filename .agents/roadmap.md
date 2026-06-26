@@ -22,11 +22,11 @@
 
 ## Phase 3 — Documentation (`README.md`)
 
-- [ ] Overview + Claude Desktop / Glama config JSON
-- [ ] Step 1: Create GCP project, enable Drive/Docs APIs
-- [ ] Step 2: Create service account, download JSON key
-- [ ] Step 3: Share target Drive folder with service account email
-- [ ] Step 4: Local setup (`.env`) and launch command
+- [x] Overview + Claude Desktop / Glama config JSON
+- [x] Step 1: Create GCP project, enable Drive/Docs APIs
+- [x] Step 2: Create service account, download JSON key
+- [x] Step 3: Share target Drive folder with service account email
+- [x] Step 4: Local setup (`.env`) and launch command
 
 ## Phase 4 — Verification
 
