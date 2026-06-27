@@ -57,6 +57,6 @@
 - [x] Add `LICENSE` file (MIT)
 - [x] Add `.github/dependabot.yml` — automated dependency updates
 - [x] Add `.github/workflows/release.yml` — automated release workflow
-- [ ] Push to GitHub (public repository)
-- [ ] Submit to Glama
-- [ ] Add Glama badge to `README.md`
+- [x] Push to GitHub (public repository)
+- [x] Submit to Glama
+- [x] Add Glama badge to `README.md`

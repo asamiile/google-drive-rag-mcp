@@ -1,5 +1,7 @@
 # google-drive-rag-mcp
 
+[![google-drive-rag-mcp MCP server](https://glama.ai/mcp/servers/asamiile/google-drive-rag-mcp/badges/card.svg)](https://glama.ai/mcp/servers/asamiile/google-drive-rag-mcp)
+
 A local MCP server that lets LLMs (Claude, etc.) securely search and read files within a single, designated Google Drive folder.
 
 ## Overview
@@ -25,12 +27,12 @@ A local MCP server that lets LLMs (Claude, etc.) securely search and read files 
 
 ### Supported File Formats
 
-| Format              | MIME Type                                  | How it's read              |
-| ------------------- | ------------------------------------------ | -------------------------- |
-| Google Docs         | `application/vnd.google-apps.document`     | Exported as plain text     |
-| Google Sheets       | `application/vnd.google-apps.spreadsheet`  | Exported as CSV            |
-| PDF                 | `application/pdf`                          | Text extracted via PyMuPDF |
-| Plain text          | `text/*`                                   | Read directly              |
+| Format        | MIME Type                                 | How it's read              |
+| ------------- | ----------------------------------------- | -------------------------- |
+| Google Docs   | `application/vnd.google-apps.document`    | Exported as plain text     |
+| Google Sheets | `application/vnd.google-apps.spreadsheet` | Exported as CSV            |
+| PDF           | `application/pdf`                         | Text extracted via PyMuPDF |
+| Plain text    | `text/*`                                  | Read directly              |
 
 ## MCP Setup
 
@@ -74,6 +76,7 @@ A local MCP server that lets LLMs (Claude, etc.) securely search and read files 
 > ```
 >
 > `.env` example:
+>
 > ```
 > TARGET_FOLDER_IDS=project_a_folder_id,project_b_folder_id
 > ```
@@ -150,6 +153,7 @@ claude mcp list
 This command only needs to be run once. The configuration is saved and loaded automatically on every Claude Code startup.
 
 Re-run it only if you:
+
 - Change environment variables (folder IDs or credentials path)
 - Move `main.py` to a different path
 - Need to reset the registration (`claude mcp remove google-drive-rag`)
