@@ -47,7 +47,7 @@
 
 ## Phase 6 — Publishing
 
-- [ ] Fix `pyproject.toml`: `requires-python = ">=3.11"` and proper description
+- [x] Fix `pyproject.toml`: `requires-python = ">=3.11"` and proper description
 - [x] Add `LICENSE` file (MIT)
 - [ ] Push to GitHub (public repository)
 - [ ] Submit to Glama
