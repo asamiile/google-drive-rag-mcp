@@ -100,6 +100,14 @@ def read_document(file_id: str) -> str:
 	
 	mime_type = file_meta.get("mimeType", "")
 
+	if mime_type == "application/vnd.google-apps.spreadsheet":
+		content = (
+			drive_service.files()
+			.export(fileId=file_id, mimeType="text/csv")
+			.execute()
+		)
+		return content.decode("utf-8")
+
 	if mime_type == "application/vnd.google-apps.document":
 		content = (
 			drive_service.files()

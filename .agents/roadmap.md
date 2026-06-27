@@ -27,6 +27,9 @@
 - [x] Step 2: Create service account, download JSON key
 - [x] Step 3: Share target Drive folder with service account email
 - [x] Step 4: Local setup (`.env`) and launch command
+- [x] Implement Google Sheets support (`export` as CSV via Drive API)
+- [ ] Implement PDF support (download binary + extract text with `pymupdf`)
+- [ ] Document supported file formats (Google Docs, plain text, Google Sheets, PDF)
 
 ## Phase 4 — Verification
 
@@ -35,3 +38,17 @@
 - [x] `list_files` returns files from target folder
 - [x] `read_document` returns text from a Google Doc
 - [x] `read_document` rejects a file outside the target folder
+
+## Phase 5 — Client Integration
+
+- [ ] Configure Claude Desktop (add to `claude_desktop_config.json`)
+- [ ] Configure Claude Code (`claude mcp add`)
+- [ ] Verify tools are available in Claude
+
+## Phase 6 — Publishing
+
+- [ ] Fix `pyproject.toml`: `requires-python = ">=3.11"` and proper description
+- [x] Add `LICENSE` file (MIT)
+- [ ] Push to GitHub (public repository)
+- [ ] Submit to Glama
+- [ ] Add Glama badge to `README.md`

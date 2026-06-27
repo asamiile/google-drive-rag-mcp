@@ -24,7 +24,7 @@ uv run fastmcp dev inspector main.py
 
 - [ ] Run without `.env` → `ERROR: GOOGLE_APPLICATION_CREDENTIALS is not set in .env`
 - [ ] Set a non-existent path for `GOOGLE_APPLICATION_CREDENTIALS` → `ERROR: Credentials file not found: ...`
-- [ ] Unset `TARGET_FOLDER_ID` only → `ERROR: TARGET_FOLDER_ID is not set in .env`
+- [ ] Unset `TARGET_FOLDER_IDS` only → `ERROR: TARGET_FOLDER_IDS is not set in .env`
 - [x] Run with a valid `.env` → server starts successfully
 
 ### `list_files` Tool
@@ -36,6 +36,7 @@ uv run fastmcp dev inspector main.py
 ### `read_document` Tool
 
 - [x] Pass a Google Doc file ID → returns plain text content
+- [x] Pass a Google Sheets file ID → returns CSV content
 - [ ] Pass a plain text file ID → returns file content
 - [ ] Pass an unsupported MIME type file ID → `ToolError: Unsupported file type ...`
 
