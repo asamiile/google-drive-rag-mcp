@@ -39,29 +39,55 @@ credentials = service_account.Credentials.from_service_account_file(
 )
 drive_service = build("drive", "v3", credentials=credentials)
 
-# --- ---
-def _collect_files(folder_id: str, query: str, _depth: int = 0) -> list:
+FILE_TYPE_MAP = {
+	"document":    "mimeType = 'application/vnd.google-apps.document'",
+	"spreadsheet": "mimeType = 'application/vnd.google-apps.spreadsheet'",
+	"pdf":         "mimeType = 'application/pdf'",
+	"image":       "mimeType contains 'image/'",
+	"text":        "mimeType = 'text/plain'",
+}
+
+# --- File collection　---
+def _collect_files(folder_id: str, query: str, _depth: int = 0, recursive: bool = True, file_type: str = "") -> list:
 	if _depth > 5:
 		return []
 
-	folder_q = f"'{folder_id}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false"
 	file_q = f"'{folder_id}' in parents and mimeType != 'application/vnd.google-apps.folder' and trashed = false"
 	if query:
 		file_q += f" and name contains '{query}'"
-
-	folders = drive_service.files().list(
-		q=folder_q, fields="files(id)", pageSize=100
-	).execute().get("files", [])
+	if file_type and file_type in FILE_TYPE_MAP:
+		file_q += f" and ({FILE_TYPE_MAP[file_type]})"
 
 	files = drive_service.files().list(
 		q=file_q, fields="files(id, name, mimeType)", pageSize=100
 	).execute().get("files", [])
 
-	for folder in folders:
-		files.extend(_collect_files(folder["id"], query, _depth + 1))
+	if recursive:
+		folder_q = f"'{folder_id}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false"
+		folders = drive_service.files().list(
+			q=folder_q, fields="files(id)", pageSize=100
+		).execute().get("files", [])
+		for folder in folders:
+			files.extend(_collect_files(folder["id"], query, _depth + 1, recursive, file_type))
 	return files
 
-# --- ---
+# --- Folder collection ---
+def _collect_folders(folder_id: str, _depth: int = 0, recursive: bool = False) -> list:
+	if _depth > 5:
+		return []
+
+	folder_q = f"'{folder_id}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false"
+	folders = drive_service.files().list(
+		q=folder_q, fields="files(id, name)", pageSize=100
+	).execute().get("files", [])
+
+	result = list(folders)
+	if recursive:
+		for folder in folders:
+			result.extend(_collect_folders(folder["id"], _depth + 1, recursive))
+	return result
+
+# --- Security check　---
 def _is_in_target_folder(file_id: str) -> bool:
 	try:
 		meta = drive_service.files().get(fileId=file_id, fields="parents").execute()
@@ -71,20 +97,34 @@ def _is_in_target_folder(file_id: str) -> bool:
 	if any(fid in parents for fid in TARGET_FOLDER_IDS):
 		return True
 	return any(_is_in_target_folder(p) for p in parents)
-	
+
 # --- FastMCP server ---
 mcp = FastMCP("Google Drive RAG")
 
 @mcp.tool(annotations=ToolAnnotations(readOnlyHint=True))
-def list_files(query: str = "") -> str:
-	"""List all files in the target Google Drive folder (including subfolders). Optionally filter by name."""	
+def list_files(query: str = "", recursive: bool = False, folder_id: str = "", file_type: str = "") -> str:
+	"""List files in the target Google Drive folders. Optionally filter by name.
+	- folder_id: scope to a specific folder (use list_folders to find IDs)
+	- recursive: set True to include subfolders — recommended when folder_id is specified or files may be nested
+	- file_type: filter by type — 'document', 'spreadsheet', 'pdf', 'image', 'text'	
+	"""
+	target_ids = [folder_id] if folder_id else TARGET_FOLDER_IDS
 	files = []
-	for folder_id in TARGET_FOLDER_IDS:
-		files.extend(_collect_files(folder_id, query))
-	
+	for fid in target_ids:
+		files.extend(_collect_files(fid, query, recursive=recursive, file_type=file_type))
 	if not files:
 		return "No files found."
 	return json.dumps(files, ensure_ascii=False, indent=2)
+
+@mcp.tool(annotations=ToolAnnotations(readOnlyHint=True))
+def list_folders(recursive: bool = False) -> str:
+	"""List folders in the target Google Drive folders. Set recursive=True to include subfolders."""
+	folders = []
+	for folder_id in TARGET_FOLDER_IDS:
+		folders.extend(_collect_folders(folder_id, recursive=recursive))
+	if not folders:
+		return "No folders found."
+	return json.dumps(folders, ensure_ascii=False, indent=2)
 
 @mcp.tool(annotations=ToolAnnotations(readOnlyHint=True))
 def read_document(file_id: str) -> str:

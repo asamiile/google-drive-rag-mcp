@@ -147,6 +147,13 @@ Verify the registration:
 claude mcp list
 ```
 
+This command only needs to be run once. The configuration is saved and loaded automatically on every Claude Code startup.
+
+Re-run it only if you:
+- Change environment variables (folder IDs or credentials path)
+- Move `main.py` to a different path
+- Need to reset the registration (`claude mcp remove google-drive-rag`)
+
 ## Development
 
 - Run the server

@@ -42,10 +42,16 @@
 ## Phase 5 — Client Integration
 
 - [ ] Configure Claude Desktop (add to `claude_desktop_config.json`)
-- [ ] Configure Claude Code (`claude mcp add`)
-- [ ] Verify tools are available in Claude
+- [x] Configure Claude Code (`claude mcp add`)
+- [x] Verify tools are available in Claude
 
-## Phase 6 — Publishing
+## Phase 6 — Usability & Performance Improvements (`list_files`)
+
+- [x] Make `list_files` non-recursive by default (`recursive: bool = False`)
+- [x] Add `list_folders` tool — return folder list only (name + id) to support folder-first workflow
+- [x] Add `file_type` filter to `list_files` (e.g. `"document"`, `"pdf"`, `"image"`)
+
+## Phase 7 — Publishing
 
 - [x] Fix `pyproject.toml`: `requires-python = ">=3.11"` and proper description
 - [x] Add `LICENSE` file (MIT)
