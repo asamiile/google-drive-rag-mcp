@@ -14,14 +14,18 @@ load_dotenv()
 
 # --- Startup validation ---
 CREDENTIALS_PATH = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
-TARGET_FOLDER_ID = os.environ.get("TARGET_FOLDER_ID")
+TARGET_FOLDER_IDS_RAW = os.environ.get("TARGET_FOLDER_IDS")
 
 if not CREDENTIALS_PATH:
 	sys.exit("ERROR: GOOGLE_APPLICATION_CREDENTIALS is not set in .env")
 if not os.path.exists(CREDENTIALS_PATH):
 	sys.exit(f"ERROR: Credentials file not found: {CREDENTIALS_PATH}")
-if not TARGET_FOLDER_ID:
-	sys.exit("ERROR: TARGET_FOLDER_ID is not set in .env")
+if not TARGET_FOLDER_IDS_RAW:
+	sys.exit("ERROR: TARGET_FOLDER_IDS is not set in .env")
+
+TARGET_FOLDER_IDS = [fid.strip() for fid in TARGET_FOLDER_IDS_RAW.split(",") if fid.strip()]
+if not TARGET_FOLDER_IDS:
+	sys.exit("ERROR: TARGET_FOLDER_IDS is empty in .env")
 
 # --- Google API client initialization ---
 SCOPES =[
@@ -63,7 +67,7 @@ def _is_in_target_folder(file_id: str) -> bool:
 	except Exception:
 		return False
 	parents = meta.get("parents", [])
-	if TARGET_FOLDER_ID in parents:
+	if any(fid in parents for fid in TARGET_FOLDER_IDS):
 		return True
 	return any(_is_in_target_folder(p) for p in parents)
 	
@@ -72,8 +76,11 @@ mcp = FastMCP("Google Drive RAG")
 
 @mcp.tool(annotations=ToolAnnotations(readOnlyHint=True))
 def list_files(query: str = "") -> str:
-	"""List all files in the target Google Drive folder (including subfolders). Optionally filter by name."""
-	files = _collect_files(TARGET_FOLDER_ID or "", query)
+	"""List all files in the target Google Drive folder (including subfolders). Optionally filter by name."""	
+	files = []
+	for folder_id in TARGET_FOLDER_IDS:
+		files.extend(_collect_files(folder_id, query))
+	
 	if not files:
 		return "No files found."
 	return json.dumps(files, ensure_ascii=False, indent=2)
