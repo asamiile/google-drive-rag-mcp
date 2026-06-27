@@ -14,24 +14,49 @@
 
 ## Phase 2 — Server Implementation (`main.py`)
 
-- [ ] Startup validation (`GOOGLE_APPLICATION_CREDENTIALS`, `TARGET_FOLDER_ID`)
-- [ ] Google API client initialization (Drive v3, Docs v1)
-- [ ] Tool: `list_files(query)` — search files in target folder
-- [ ] Tool: `read_document(file_id)` — read Google Docs / plain text
-- [ ] Security check in `read_document` — verify file is in target folder
+- [x] Startup validation (`GOOGLE_APPLICATION_CREDENTIALS`, `TARGET_FOLDER_ID`)
+- [x] Google API client initialization (Drive v3, Docs v1)
+- [x] Tool: `list_files(query)` — search files in target folder
+- [x] Tool: `read_document(file_id)` — read Google Docs / plain text
+- [x] Security check in `read_document` — verify file is in target folder
 
 ## Phase 3 — Documentation (`README.md`)
 
-- [ ] Overview + Claude Desktop / Glama config JSON
-- [ ] Step 1: Create GCP project, enable Drive/Docs APIs
-- [ ] Step 2: Create service account, download JSON key
-- [ ] Step 3: Share target Drive folder with service account email
-- [ ] Step 4: Local setup (`.env`) and launch command
+- [x] Overview + Claude Desktop / Glama config JSON
+- [x] Step 1: Create GCP project, enable Drive/Docs APIs
+- [x] Step 2: Create service account, download JSON key
+- [x] Step 3: Share target Drive folder with service account email
+- [x] Step 4: Local setup (`.env`) and launch command
+- [x] Implement Google Sheets support (`export` as CSV via Drive API)
+- [x] Implement PDF support (download binary + extract text with `pymupdf`)
+- [x] Document supported file formats (Google Docs, plain text, Google Sheets, PDF)
 
 ## Phase 4 — Verification
 
-- [ ] `uv sync` succeeds
-- [ ] Server exits with clear error when `.env` is missing
-- [ ] `list_files` returns files from target folder
-- [ ] `read_document` returns text from a Google Doc
-- [ ] `read_document` rejects a file outside the target folder
+- [x] `uv sync` succeeds
+- [x] Server exits with clear error when `.env` is missing
+- [x] `list_files` returns files from target folder
+- [x] `read_document` returns text from a Google Doc
+- [x] `read_document` rejects a file outside the target folder
+
+## Phase 5 — Client Integration
+
+- [ ] Configure Claude Desktop (add to `claude_desktop_config.json`)
+- [x] Configure Claude Code (`claude mcp add`)
+- [x] Verify tools are available in Claude
+
+## Phase 6 — Usability & Performance Improvements (`list_files`)
+
+- [x] Make `list_files` non-recursive by default (`recursive: bool = False`)
+- [x] Add `list_folders` tool — return folder list only (name + id) to support folder-first workflow
+- [x] Add `file_type` filter to `list_files` (e.g. `"document"`, `"pdf"`, `"image"`)
+
+## Phase 7 — Publishing
+
+- [x] Fix `pyproject.toml`: `requires-python = ">=3.11"` and proper description
+- [x] Add `LICENSE` file (MIT)
+- [x] Add `.github/dependabot.yml` — automated dependency updates
+- [x] Add `.github/workflows/release.yml` — automated release workflow
+- [ ] Push to GitHub (public repository)
+- [ ] Submit to Glama
+- [ ] Add Glama badge to `README.md`
