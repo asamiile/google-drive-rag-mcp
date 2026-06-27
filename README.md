@@ -4,19 +4,35 @@ A local MCP server that lets LLMs (Claude, etc.) securely search and read files 
 
 ## Overview
 
-- Scoped to a single folder — never accesses files outside `TARGET_FOLDER_ID`
+- Scoped to specified folders — never accesses files outside `TARGET_FOLDER_IDS`
 - Authenticated via Google Service Account (no personal OAuth required)
 - Read-only access (`drive.readonly`, `documents.readonly`)
 - Built with [FastMCP](https://gofastmcp.com) on Python 3.11+
 
-### MCP Tools
+## Use Cases
+
+- **Research**: Ask Claude to find and summarize documents stored in a shared Google Drive folder
+- **Team knowledge base**: Search internal documents, reports, or meeting notes by keyword
+- **Study notes**: Retrieve lecture notes or course materials from a Drive folder and ask questions about them
+- **Document Q&A**: "What does the report from last month say about X?" — Claude reads and answers
+
+## MCP Tools
 
 | Tool                     | Description                                                  |
 | ------------------------ | ------------------------------------------------------------ |
 | `list_files(query)`      | List files in the target folder, optionally filtered by name |
-| `read_document(file_id)` | Read text content of a Google Doc or plain text file         |
+| `read_document(file_id)` | Read text content of a supported file                        |
 
-## Setup
+### Supported File Formats
+
+| Format              | MIME Type                                  | How it's read              |
+| ------------------- | ------------------------------------------ | -------------------------- |
+| Google Docs         | `application/vnd.google-apps.document`     | Exported as plain text     |
+| Google Sheets       | `application/vnd.google-apps.spreadsheet`  | Exported as CSV            |
+| PDF                 | `application/pdf`                          | Text extracted via PyMuPDF |
+| Plain text          | `text/*`                                   | Read directly              |
+
+## MCP Setup
 
 ### Step 1 — Create a GCP Project and Enable APIs
 
@@ -49,6 +65,19 @@ A local MCP server that lets LLMs (Claude, etc.) securely search and read files 
 > The folder ID is the last part of the folder URL:  
 > `https://drive.google.com/drive/folders/`**`THIS_IS_THE_FOLDER_ID`**
 
+> **Tip — Multiple folders**: You can share a parent folder with the service account and set individual subfolders in `TARGET_FOLDER_IDS`. Access to subfolders is inherited from the parent.
+>
+> ```
+> Parent Folder        ← Share with the service account (Viewer)
+> ├── Project A        ← Add this folder ID to TARGET_FOLDER_IDS
+> └── Project B        ← Add this folder ID to TARGET_FOLDER_IDS
+> ```
+>
+> `.env` example:
+> ```
+> TARGET_FOLDER_IDS=project_a_folder_id,project_b_folder_id
+> ```
+
 ### Step 4 — Local Setup and Launch
 
 ```bash
@@ -67,12 +96,7 @@ Edit `.env`:
 
 ```
 GOOGLE_APPLICATION_CREDENTIALS=/path/to/your/service-account-key.json
-TARGET_FOLDER_ID=your_google_drive_folder_id_here
-```
-
-```bash
-# 4. Start the MCP server
-uv run python main.py
+TARGET_FOLDER_IDS=folder_id_1,folder_id_2
 ```
 
 ### Step 5 — Connect to Claude
@@ -90,7 +114,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
       "cwd": "/path/to/google-drive-rag-mcp",
       "env": {
         "GOOGLE_APPLICATION_CREDENTIALS": "/path/to/your/service-account-key.json",
-        "TARGET_FOLDER_ID": "your_google_drive_folder_id_here"
+        "TARGET_FOLDER_IDS": "folder_id_1,folder_id_2"
       }
     }
   }
@@ -104,7 +128,7 @@ Restart Claude Desktop to apply the changes.
 ```bash
 claude mcp add google-drive-rag \
   -e GOOGLE_APPLICATION_CREDENTIALS=/path/to/your/service-account-key.json \
-  -e TARGET_FOLDER_ID=your_google_drive_folder_id_here \
+  -e TARGET_FOLDER_IDS=folder_id_1,folder_id_2 \
   -- uv run python /path/to/google-drive-rag-mcp/main.py
 ```
 
@@ -113,7 +137,7 @@ To make it available across all projects, add `--scope user`:
 ```bash
 claude mcp add --scope user google-drive-rag \
   -e GOOGLE_APPLICATION_CREDENTIALS=/path/to/your/service-account-key.json \
-  -e TARGET_FOLDER_ID=your_google_drive_folder_id_here \
+  -e TARGET_FOLDER_IDS=folder_id_1,folder_id_2 \
   -- uv run python /path/to/google-drive-rag-mcp/main.py
 ```
 
@@ -125,8 +149,15 @@ claude mcp list
 
 ## Development
 
+- Run the server
+
 ```bash
-# Run the server
+uv run python main.py
+```
+
+- Start the MCP server
+
+```bash
 uv run python main.py
 ```
 

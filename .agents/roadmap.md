@@ -28,8 +28,8 @@
 - [x] Step 3: Share target Drive folder with service account email
 - [x] Step 4: Local setup (`.env`) and launch command
 - [x] Implement Google Sheets support (`export` as CSV via Drive API)
-- [ ] Implement PDF support (download binary + extract text with `pymupdf`)
-- [ ] Document supported file formats (Google Docs, plain text, Google Sheets, PDF)
+- [x] Implement PDF support (download binary + extract text with `pymupdf`)
+- [x] Document supported file formats (Google Docs, plain text, Google Sheets, PDF)
 
 ## Phase 4 — Verification
 

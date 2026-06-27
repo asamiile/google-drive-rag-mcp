@@ -8,5 +8,6 @@ dependencies = [
     "fastmcp>=3.4.2",
     "google-api-python-client>=2.198.0",
     "google-auth>=2.55.1",
+    "pymupdf>=1.27.2.3",
     "python-dotenv>=1.2.2",
 ]

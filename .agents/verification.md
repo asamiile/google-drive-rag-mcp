@@ -37,6 +37,7 @@ uv run fastmcp dev inspector main.py
 
 - [x] Pass a Google Doc file ID → returns plain text content
 - [x] Pass a Google Sheets file ID → returns CSV content
+- [x] Pass a PDF file ID → returns extracted plain text content
 - [ ] Pass a plain text file ID → returns file content
 - [ ] Pass an unsupported MIME type file ID → `ToolError: Unsupported file type ...`
 

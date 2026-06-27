@@ -2,11 +2,12 @@ import json
 import os
 import sys
 
-from dotenv import load_dotenv
 from fastmcp import FastMCP
 from fastmcp.exceptions import ToolError
 from mcp.types import ToolAnnotations
 
+from dotenv import load_dotenv
+import fitz
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
@@ -119,6 +120,13 @@ def read_document(file_id: str) -> str:
 	if mime_type.startswith("text/"):
 		content = drive_service.files().get_media(fileId=file_id).execute()
 		return content.decode("utf-8")
+
+	if mime_type == "application/pdf":
+		pdf_bytes = drive_service.files().get_media(fileId=file_id).execute()
+		doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+		text = "\n".join(str(page.get_text()) for page in doc)
+		doc.close()
+		return text
 
 	raise ToolError(f"Unsupported file type '{mime_type}'. Only Google Docs and plain text files are supported.")
 
