@@ -49,6 +49,8 @@
 
 - [x] Fix `pyproject.toml`: `requires-python = ">=3.11"` and proper description
 - [x] Add `LICENSE` file (MIT)
+- [x] Add `.github/dependabot.yml` — automated dependency updates
+- [x] Add `.github/workflows/release.yml` — automated release workflow
 - [ ] Push to GitHub (public repository)
 - [ ] Submit to Glama
 - [ ] Add Glama badge to `README.md`
