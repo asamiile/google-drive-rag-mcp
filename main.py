@@ -103,10 +103,19 @@ mcp = FastMCP("Google Drive RAG")
 
 @mcp.tool(annotations=ToolAnnotations(readOnlyHint=True))
 def list_files(query: str = "", recursive: bool = False, folder_id: str = "", file_type: str = "") -> str:
-	"""List files in the target Google Drive folders. Optionally filter by name.
-	- folder_id: scope to a specific folder (use list_folders to find IDs)
-	- recursive: set True to include subfolders — recommended when folder_id is specified or files may be nested
-	- file_type: filter by type — 'document', 'spreadsheet', 'pdf', 'image', 'text'	
+	"""
+	List files in the target Google Drive folders. Use this to discover files before reading them.
+
+	Returns a JSON array of objects with 'id', 'name', and 'mimeType'. Pass the 'id' to
+	read_document to retrieve file contents.
+
+	Args:
+			query:     Filter by filename substring (case-insensitive). Empty string returns all files.
+			folder_id: Scope to a specific subfolder ID (obtain from list_folders). Defaults to all target folders.
+			recursive: If True, searches nested subfolders. Recommended when folder_id is set. Defaults to False.
+			file_type: Filter by type — 'document', 'spreadsheet', 'pdf', 'image', or 'text'.
+
+	Returns "No files found." if no files match the criteria.
 	"""
 	target_ids = [folder_id] if folder_id else TARGET_FOLDER_IDS
 	files = []
@@ -118,7 +127,18 @@ def list_files(query: str = "", recursive: bool = False, folder_id: str = "", fi
 
 @mcp.tool(annotations=ToolAnnotations(readOnlyHint=True))
 def list_folders(recursive: bool = False) -> str:
-	"""List folders in the target Google Drive folders. Set recursive=True to include subfolders."""
+	"""
+	List subfolders within the target Google Drive folders.
+
+	Use this before list_files when you need to scope a search to a specific subfolder.
+	Returns a JSON array of objects with 'id' and 'name'. Pass a folder 'id' to list_files
+	as folder_id to narrow the search scope.
+
+	Args:
+			recursive: If True, includes nested subfolders. Defaults to False (top-level only).
+
+	Returns "No folders found." if the target folders contain no subfolders.
+	"""
 	folders = []
 	for folder_id in TARGET_FOLDER_IDS:
 		folders.extend(_collect_folders(folder_id, recursive=recursive))
@@ -128,7 +148,23 @@ def list_folders(recursive: bool = False) -> str:
 
 @mcp.tool(annotations=ToolAnnotations(readOnlyHint=True))
 def read_document(file_id: str) -> str:
-	"""Read the text content of a file in the target Google Drive folder."""
+	"""
+	Read and return the full text content of a file in the target Google Drive folder.
+
+	Typical workflow: call list_files to find the file and obtain its 'id', then pass that id here.
+
+	Supported formats:
+		- Google Docs      → exported as plain text
+		- Google Sheets    → exported as CSV
+		- PDF              → text extracted via PyMuPDF
+		- Plain text files → read directly
+
+	Args:
+			file_id: The Google Drive file ID (obtained from list_files).
+
+	Raises ToolError if the file is outside the target folder (access denied) or if the
+	file type is unsupported.
+	"""
 	# Security check
 	if not _is_in_target_folder(file_id):
 		raise ToolError(f"File '{file_id}' is not in the target folder. Access denied.")
@@ -171,4 +207,4 @@ def read_document(file_id: str) -> str:
 	raise ToolError(f"Unsupported file type '{mime_type}'. Only Google Docs and plain text files are supported.")
 
 if __name__ == "__main__":
-  mcp.run()
+	mcp.run()
