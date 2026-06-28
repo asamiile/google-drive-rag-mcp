@@ -20,10 +20,10 @@ A local MCP server that lets LLMs (Claude, etc.) securely search and read files 
 
 ## MCP Tools
 
-| Tool                     | Description                                                  |
-| ------------------------ | ------------------------------------------------------------ |
-| `list_files(query)`      | List files in the target folder, optionally filtered by name |
-| `read_document(file_id)` | Read text content of a supported file                        |
+| Tool                 | Description                                                  |
+| -------------------- | ------------------------------------------------------------ |
+| `list_files(query)`  | List files in the target folder, optionally filtered by name |
+| `read_file(file_id)` | Read text content of a supported file                        |
 
 ### Supported File Formats
 

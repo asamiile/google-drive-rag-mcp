@@ -12,14 +12,14 @@ within a **single, designated Google Drive folder** — nothing outside it.
 
 ## Key Files
 
-| File | Purpose |
-|---|---|
-| `main.py` | FastMCP server — all tools live here |
-| `pyproject.toml` | Dependencies managed by uv |
-| `.env` | Runtime secrets (never commit) |
-| `.env.example` | Template — commit this |
-| `README.md` | User-facing setup guide |
-| `.agents/roadmap.md` | Development roadmap |
+| File                 | Purpose                              |
+| -------------------- | ------------------------------------ |
+| `main.py`            | FastMCP server — all tools live here |
+| `pyproject.toml`     | Dependencies managed by uv           |
+| `.env`               | Runtime secrets (never commit)       |
+| `.env.example`       | Template — commit this               |
+| `README.md`          | User-facing setup guide              |
+| `.agents/roadmap.md` | Development roadmap                  |
 
 ## Running the Server
 
@@ -45,14 +45,14 @@ uv run python main.py
 
 ## Environment Variables
 
-| Variable | Description |
-|---|---|
-| `GOOGLE_APPLICATION_CREDENTIALS` | Absolute path to service account JSON key |
-| `TARGET_FOLDER_ID` | Google Drive folder ID to scope all operations |
+| Variable                         | Description                                    |
+| -------------------------------- | ---------------------------------------------- |
+| `GOOGLE_APPLICATION_CREDENTIALS` | Absolute path to service account JSON key      |
+| `TARGET_FOLDER_ID`               | Google Drive folder ID to scope all operations |
 
 ## MCP Tools
 
-| Tool | Signature | Description |
-|---|---|---|
+| Tool         | Signature                  | Description                                        |
+| ------------ | -------------------------- | -------------------------------------------------- |
 | `list_files` | `(query: str = "") -> str` | Lists files in target folder, optional name filter |
-| `read_document` | `(file_id: str) -> str` | Reads text content of a file (Docs or plain text) |
+| `read_file`  | `(file_id: str) -> str`    | Reads text content of a file (Docs or plain text)  |

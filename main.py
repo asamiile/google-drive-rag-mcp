@@ -107,7 +107,7 @@ def list_files(query: str = "", recursive: bool = False, folder_id: str = "", fi
 	List files in the target Google Drive folders. Use this to discover files before reading them.
 
 	Returns a JSON array of objects with 'id', 'name', and 'mimeType'. Pass the 'id' to
-	read_document to retrieve file contents.
+	read_file to retrieve file contents.
 
 	Args:
 			query:     Filter by filename substring (case-insensitive). Empty string returns all files.
@@ -147,7 +147,7 @@ def list_folders(recursive: bool = False) -> str:
 	return json.dumps(folders, ensure_ascii=False, indent=2)
 
 @mcp.tool(annotations=ToolAnnotations(readOnlyHint=True))
-def read_document(file_id: str) -> str:
+def read_file(file_id: str) -> str:
 	"""
 	Read and return the full text content of a file in the target Google Drive folder.
 
