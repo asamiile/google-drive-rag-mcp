@@ -52,7 +52,8 @@ uv run python main.py
 
 ## MCP Tools
 
-| Tool         | Signature                  | Description                                        |
-| ------------ | -------------------------- | -------------------------------------------------- |
-| `list_files` | `(query: str = "") -> str` | Lists files in target folder, optional name filter |
-| `read_file`  | `(file_id: str) -> str`    | Reads text content of a file (Docs or plain text)  |
+| Tool             | Signature                                                                                  | Description                                                                |
+| ---------------- | ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------- |
+| `list_files`     | `(query: str = "") -> str`                                                                 | Lists files in target folder, optional name filter                         |
+| `read_file`      | `(file_id: str) -> str`                                                                    | Reads text content of a file (Docs or plain text)                          |
+| `search_content` | `(query: str, file_type: str = "", recursive: bool = False, max_results: int = 10) -> str` | Searches file contents for a keyword; returns matching files with snippets |
