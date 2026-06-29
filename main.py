@@ -1,6 +1,5 @@
 import json
 import os
-import sys
 
 from fastmcp import FastMCP
 from fastmcp.exceptions import ToolError
@@ -13,31 +12,34 @@ from googleapiclient.discovery import build
 
 load_dotenv()
 
-# --- Startup validation ---
-CREDENTIALS_PATH = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
-TARGET_FOLDER_IDS_RAW = os.environ.get("TARGET_FOLDER_IDS")
-
-if not CREDENTIALS_PATH:
-	sys.exit("ERROR: GOOGLE_APPLICATION_CREDENTIALS is not set in .env")
-if not os.path.exists(CREDENTIALS_PATH):
-	sys.exit(f"ERROR: Credentials file not found: {CREDENTIALS_PATH}")
-if not TARGET_FOLDER_IDS_RAW:
-	sys.exit("ERROR: TARGET_FOLDER_IDS is not set in .env")
-
-TARGET_FOLDER_IDS = [fid.strip() for fid in TARGET_FOLDER_IDS_RAW.split(",") if fid.strip()]
-if not TARGET_FOLDER_IDS:
-	sys.exit("ERROR: TARGET_FOLDER_IDS is empty in .env")
-
-# --- Google API client initialization ---
 SCOPES =[
 	"https://www.googleapis.com/auth/drive.readonly",
 	"https://www.googleapis.com/auth/documents.readonly",
 ]
 
-credentials = service_account.Credentials.from_service_account_file(
-	CREDENTIALS_PATH, scopes=SCOPES
-)
-drive_service = build("drive", "v3", credentials=credentials)
+_drive_service = None
+
+def _get_drive_service():
+	global _drive_service
+	if _drive_service is not None:
+		return _drive_service
+	credentials_path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
+	if not credentials_path:
+		raise ToolError("GOOGLE_APPLICATION_CREDENTIALS is not set.")
+	if not os.path.exists(credentials_path):
+		raise ToolError(f"Credentials file not found: {credentials_path}")
+	credentials = service_account.Credentials.from_service_account_file(
+		credentials_path, scopes=SCOPES
+	)
+	_drive_service = build("drive", "v3", credentials=credentials)
+	return _drive_service
+
+def _get_target_folder_ids() -> list[str]:
+	raw = os.environ.get("TARGET_FOLDER_IDS", "")
+	ids = [fid.strip() for fid in raw.split(",") if fid.strip()]
+	if not ids:
+		raise ToolError("TARGET_FOLDER_IDS is not set or empty.")
+	return ids
 
 FILE_TYPE_MAP = {
 	"document":    "mimeType = 'application/vnd.google-apps.document'",
@@ -58,13 +60,13 @@ def _collect_files(folder_id: str, query: str, _depth: int = 0, recursive: bool 
 	if file_type and file_type in FILE_TYPE_MAP:
 		file_q += f" and ({FILE_TYPE_MAP[file_type]})"
 
-	files = drive_service.files().list(
+	files = _get_drive_service().files().list(
 		q=file_q, fields="files(id, name, mimeType)", pageSize=100
 	).execute().get("files", [])
 
 	if recursive:
 		folder_q = f"'{folder_id}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false"
-		folders = drive_service.files().list(
+		folders = _get_drive_service().files().list(
 			q=folder_q, fields="files(id)", pageSize=100
 		).execute().get("files", [])
 		for folder in folders:
@@ -77,7 +79,7 @@ def _collect_folders(folder_id: str, _depth: int = 0, recursive: bool = False) -
 		return []
 
 	folder_q = f"'{folder_id}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false"
-	folders = drive_service.files().list(
+	folders = _get_drive_service().files().list(
 		q=folder_q, fields="files(id, name)", pageSize=100
 	).execute().get("files", [])
 
@@ -90,24 +92,24 @@ def _collect_folders(folder_id: str, _depth: int = 0, recursive: bool = False) -
 # --- Security check　---
 def _is_in_target_folder(file_id: str) -> bool:
 	try:
-		meta = drive_service.files().get(fileId=file_id, fields="parents").execute()
+		meta = _get_drive_service().files().get(fileId=file_id, fields="parents").execute()
 	except Exception:
 		return False
 	parents = meta.get("parents", [])
-	if any(fid in parents for fid in TARGET_FOLDER_IDS):
+	if any(fid in parents for fid in _get_target_folder_ids()):
 		return True
 	return any(_is_in_target_folder(p) for p in parents)
 
 # --- File content reading ---
 def _read_file_content(file_id: str, mime_type: str) -> str:
 	if mime_type == "application/vnd.google-apps.spreadsheet":
-		return drive_service.files().export(fileId=file_id, mimeType="text/csv").execute().decode("utf-8")
+		return _get_drive_service().files().export(fileId=file_id, mimeType="text/csv").execute().decode("utf-8")
 	if mime_type == "application/vnd.google-apps.document":
-		return drive_service.files().export(fileId=file_id, mimeType="text/plain").execute().decode("utf-8")
+		return _get_drive_service().files().export(fileId=file_id, mimeType="text/plain").execute().decode("utf-8")
 	if mime_type.startswith("text/"):
-		return drive_service.files().get_media(fileId=file_id).execute().decode("utf-8")
+		return _get_drive_service().files().get_media(fileId=file_id).execute().decode("utf-8")
 	if mime_type == "application/pdf":
-		pdf_bytes = drive_service.files().get_media(fileId=file_id).execute()
+		pdf_bytes = _get_drive_service().files().get_media(fileId=file_id).execute()
 		doc = fitz.open(stream=pdf_bytes, filetype="pdf")
 		text = "\n".join(str(page.get_text()) for page in doc)
 		doc.close()
@@ -147,7 +149,7 @@ def list_files(query: str = "", recursive: bool = False, folder_id: str = "", fi
 
 	Returns "No files found." if no files match the criteria.
 	"""
-	target_ids = [folder_id] if folder_id else TARGET_FOLDER_IDS
+	target_ids = [folder_id] if folder_id else _get_target_folder_ids()
 	files = []
 	for fid in target_ids:
 		files.extend(_collect_files(fid, query, recursive=recursive, file_type=file_type))
@@ -170,7 +172,7 @@ def list_folders(recursive: bool = False) -> str:
 	Returns "No folders found." if the target folders contain no subfolders.
 	"""
 	folders = []
-	for folder_id in TARGET_FOLDER_IDS:
+	for folder_id in _get_target_folder_ids():
 		folders.extend(_collect_folders(folder_id, recursive=recursive))
 	if not folders:
 		return "No folders found."
@@ -198,7 +200,7 @@ def read_file(file_id: str) -> str:
 	if not _is_in_target_folder(file_id):
 		raise ToolError(f"File '{file_id}' is not in the target folder. Access denied.")
 
-	file_meta = drive_service.files().get(fileId=file_id, fields="id, name, mimeType").execute()	
+	file_meta = _get_drive_service().files().get(fileId=file_id, fields="id, name, mimeType").execute()	
 	return _read_file_content(file_id, file_meta.get("mimeType", ""))
 
 @mcp.tool(annotations=ToolAnnotations(readOnlyHint=True))
@@ -232,7 +234,7 @@ def search_content(query: str, file_type: str = "", recursive: bool = False, max
 	searchable_type = file_type if file_type in FILE_TYPE_MAP and file_type != "image" else ""
 
 	candidates = []
-	for fid in TARGET_FOLDER_IDS:
+	for fid in _get_target_folder_ids():
 		candidates.extend(_collect_files(fid, "", recursive=recursive, file_type=searchable_type))
 
 	candidates = [
