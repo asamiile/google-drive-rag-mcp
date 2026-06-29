@@ -159,6 +159,28 @@ Re-run it only if you:
 - Move `main.py` to a different path
 - Need to reset the registration (`claude mcp remove google-drive-rag`)
 
+## Team Deployment
+
+This server uses a Google Service Account for authentication. For team deployments,
+issue a **separate service account per member** rather than sharing a single key.
+
+### Why separate accounts?
+
+- **Auditability**: Google Drive audit logs identify each service account individually.
+- **Access revocation**: Remove a member's access by deleting their service account only —
+  no need to rotate a shared key or update everyone's configuration.
+- **Least privilege**: Each account can be scoped to only the folders that member needs.
+
+### Setup
+
+1. Create one service account per team member in GCP
+   (e.g. `alice-drive-rag@your-project.iam.gserviceaccount.com`)
+2. Share the target Google Drive folder with each service account (Viewer)
+3. Each member configures their own `.env` with their personal JSON key path
+
+> **Note**: The `.env` file alone is not sufficient for access — the service account
+> JSON key file is the actual credential and must be kept secret by each individual.
+
 ## Development
 
 - Run the server
